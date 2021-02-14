@@ -10,11 +10,7 @@ using System.Windows.Interop;
 
 namespace WpfWin32HostSample
 {
-    /// <summary>
-    /// Embedding Unity application inside WPF.
-    /// See https://stackoverflow.com/questions/43955901/embedding-unity-in-wpf-with-parenthwnd.
-    /// </summary>
-    class UnityHwndHost : HwndHost
+    class UnityHost : HwndHost
     {
         internal delegate int WindowEnumProc(IntPtr hwnd, IntPtr lparam);
         [DllImport("user32.dll")]
@@ -35,7 +31,7 @@ namespace WpfWin32HostSample
         private Process process = null;
         private IntPtr unityHWND = IntPtr.Zero;
 
-        public UnityHwndHost(string programName, string arguments = "")
+        public UnityHost(string programName, string arguments = "")
         {
             this.programName = programName;
             this.arguments = arguments;
@@ -43,6 +39,8 @@ namespace WpfWin32HostSample
 
         protected override HandleRef BuildWindowCore(HandleRef hwndParent)
         {
+            //Task.Run(() => { UnityInit(hwndParent.Handle); });
+
             Debug.WriteLine("Going to launch Unity at: " + this.programName + " " + this.arguments);
             process = new Process();
             process.StartInfo.FileName = programName;
@@ -53,11 +51,18 @@ namespace WpfWin32HostSample
             process.Start();
             process.WaitForInputIdle();
 
+            UnityInit(hwndParent.Handle);
+
+            return new HandleRef(this, unityHWND);
+        }
+
+        private void UnityInit(IntPtr parent)
+        {
             int repeat = 50;
             while (unityHWND == IntPtr.Zero && repeat-- > 0)
             {
                 Thread.Sleep(100);
-                EnumChildWindows(hwndParent.Handle, WindowEnum, IntPtr.Zero);
+                EnumChildWindows(parent, WindowEnum, IntPtr.Zero);
             }
             if (unityHWND == IntPtr.Zero)
                 throw new Exception("Unable to find Unity window");
@@ -77,15 +82,18 @@ namespace WpfWin32HostSample
             {
                 Debug.WriteLine("Unity initialized!");
             }
-
-            return new HandleRef(this, unityHWND);
         }
+
+        private const int WM_ACTIVATE = 0x0006;
+        private readonly IntPtr WA_ACTIVE = new IntPtr(1);
+        private readonly IntPtr WA_INACTIVE = new IntPtr(0);
 
         private int WindowEnum(IntPtr hwnd, IntPtr lparam)
         {
             if (unityHWND != IntPtr.Zero)
                 throw new Exception("Found multiple Unity windows");
             unityHWND = hwnd;
+            SendMessage(unityHWND, WM_ACTIVATE, WA_ACTIVE, IntPtr.Zero);
             return 0;
         }
 
