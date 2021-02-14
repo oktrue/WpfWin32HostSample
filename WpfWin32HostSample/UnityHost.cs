@@ -31,6 +31,11 @@ namespace WpfWin32HostSample
         private Process process = null;
         private IntPtr unityHWND = IntPtr.Zero;
 
+        public IntPtr UnityHWND
+        { 
+            get { return unityHWND; }
+        }
+
         public UnityHost(string programName, string arguments = "")
         {
             this.programName = programName;

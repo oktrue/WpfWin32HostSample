@@ -22,15 +22,58 @@ namespace WpfWin32HostSample
     /// </summary>
     public partial class MainWindow : Window
     {
+        UnityFtpConnection unityConnection = new UnityFtpConnection();
+        UnityHost unity;
+
         public MainWindow()
         {
             InitializeComponent();
+            Task.Run(() => { unityConnection.Test(); });
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            var unity = new UnityHost("Test.exe");
+            unity = new UnityHost("Test.exe");
             ControlHostElement.Child = unity;
+        }
+
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+            unityConnection.Send("Hello World");
+        }
+
+        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            unityConnection.Stop();
+        }
+
+        private void Window_Activated(object sender, EventArgs e)
+        {
+            ActivateUnityWindow();
+        }
+
+        private void Window_Deactivated(object sender, EventArgs e)
+        {
+            DeactivateUnityWindow();
+        }
+
+        private const int WM_ACTIVATE = 0x0006;
+        private readonly IntPtr WA_ACTIVE = new IntPtr(1);
+        private readonly IntPtr WA_INACTIVE = new IntPtr(0);
+
+        [DllImport("user32.dll")]
+        static extern int SendMessage(IntPtr hWnd, int msg, IntPtr wParam, IntPtr lParam);
+
+        private void ActivateUnityWindow()
+        {
+            //if (unity == null) return;
+            //SendMessage(unity.UnityHWND, WM_ACTIVATE, WA_ACTIVE, IntPtr.Zero);
+        }
+
+        private void DeactivateUnityWindow()
+        {
+            //if (unity == null) return;
+            //SendMessage(unity.UnityHWND, WM_ACTIVATE, WA_INACTIVE, IntPtr.Zero);
         }
     }
 }

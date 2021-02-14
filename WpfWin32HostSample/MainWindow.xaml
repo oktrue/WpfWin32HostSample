@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:WpfWin32HostSample"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800" Loaded="Window_Loaded" SnapsToDevicePixels="True" Background="#2d2d30" Foreground="White">
+        Title="MainWindow" Height="450" Width="800" Loaded="Window_Loaded" SnapsToDevicePixels="True" Background="#2d2d30" Foreground="White" Closing="Window_Closing" Activated="Window_Activated" Deactivated="Window_Deactivated">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="4"/>
@@ -14,6 +14,7 @@
         </Grid.RowDefinitions>
 
         <TextBlock Grid.Row="1" Text="Embedded Unity in WPF Demo Application" Margin="4,0"/>
+        <Button Grid.Row="1" HorizontalAlignment="Right" Width="120" Content="Click" Margin="4,0" Click="Button_Click"/>
         <Border Grid.Row="2" Name="ControlHostElement" Margin="4" BorderBrush="#3f3f46" BorderThickness="1"/>
     </Grid>
 </Window>
